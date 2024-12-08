@@ -1,10 +1,10 @@
 name:                markdown-to-html
 version:             0.1.0.0
-github:              "sergeiThe/markdown-to-html"
+github:              "githubuser/markdown-to-html"
 license:             BSD-3-Clause
-author:              "Sergei Johansen"
-maintainer:          "sergei.johansen@protonmail.com"
-copyright:           "2024 Sergei Johansen"
+author:              "Author name here"
+maintainer:          "example@example.com"
+copyright:           "2024 Author name here"
 
 extra-source-files:
 - README.md
@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- mtl
 
 ghc-options:
 - -Wall
