@@ -3,6 +3,7 @@ module Lib
     ) where
 
 import Control.Applicative (Alternative(..))
+import Data.List (isSuffixOf)
 
 
 
@@ -45,28 +46,34 @@ charP ch = Parser f
 stringP :: String -> Parser String
 stringP = mapM charP
 
-
 h1 :: Parser Markdown
-h1 = Parser $ \input ->
-    if take 2 input == "# "
-    then Just (Heading 1 (takeWhile (/= '\n') (drop 2 input)), dropWhile (/= '\n') input)
-    else Nothing
+h1 = headingOfLevel 1
 
 h2 :: Parser Markdown
-h2 = Parser $ \input ->
-    if take 3 input == "## "
-    then Just (Heading 2 (takeWhile (/= '\n') (drop 3 input)), dropWhile (/= '\n') input)
-    else Nothing
+h2 = headingOfLevel 2
 
 h3 :: Parser Markdown
-h3 = Parser $ \input ->
-    if take 4 input == "### "
-    then Just (Heading 3 (takeWhile (/= '\n') (drop 4 input)), dropWhile (/= '\n') input)
+h3 = headingOfLevel 3
+
+h4 :: Parser Markdown
+h4 = headingOfLevel 4
+
+h5 :: Parser Markdown
+h5 = headingOfLevel 5
+
+h6 :: Parser Markdown
+h6 = headingOfLevel 6
+
+headingOfLevel :: Int -> Parser Markdown
+headingOfLevel level = Parser $ \input ->
+    if "# " `isSuffixOf` take (level + 1) input
+    then Just (Heading level (takeWhile (/= '\n') (drop (level + 1) input)), dropWhile (/= '\n') input)
     else Nothing
 
+headingParser = h1 <|> h2 <|> h3 <|> h4 <|> h5 <|> h6
 
-p :: Parser Markdown
-p = Parser $ \input -> Just (Paragraph $ takeWhile (/= '\n') input, dropWhile (/= '\n') input)
+paragraphParser :: Parser Markdown
+paragraphParser = Parser $ \input -> Just (Paragraph $ takeWhile (/= '\n') input, dropWhile (/= '\n') input)
 
-heading :: Parser Markdown
-heading = h1 <|> h2 <|> h3 <|> p
+markdownParser :: Parser Markdown
+markdownParser = headingParser <|> paragraphParser
