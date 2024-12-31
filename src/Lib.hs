@@ -34,6 +34,7 @@ instance Alternative Parser where
         Parser $ \input -> x input <|> y input
 
 
+
 charP :: Char -> Parser Char
 charP ch = Parser f
     where
@@ -67,13 +68,31 @@ h6 = headingOfLevel 6
 headingOfLevel :: Int -> Parser Markdown
 headingOfLevel level = Parser $ \input ->
     if "# " `isSuffixOf` take (level + 1) input
-    then Just (Heading level (takeWhile (/= '\n') (drop (level + 1) input)), dropWhile (/= '\n') input)
+    then Just (Heading level (takeWhile (/= '\n') (drop (level + 1) input)), dropWhileExcl (/= '\n') input)
     else Nothing
 
+headingParser :: Parser Markdown
 headingParser = h1 <|> h2 <|> h3 <|> h4 <|> h5 <|> h6
 
 paragraphParser :: Parser Markdown
-paragraphParser = Parser $ \input -> Just (Paragraph $ takeWhile (/= '\n') input, dropWhile (/= '\n') input)
+paragraphParser = Parser $ \input -> case input of 
+    [] -> Nothing
+    _ -> Just (Paragraph $ takeWhile (/= '\n') input, dropWhileExcl (/= '\n') input)
 
 markdownParser :: Parser Markdown
 markdownParser = headingParser <|> paragraphParser
+
+
+dropWhileExcl :: (a -> Bool) -> [a] -> [a]
+dropWhileExcl _ [] = []
+dropWhileExcl _ [_] = []
+dropWhileExcl f (x:xs) = if f x then dropWhileExcl f xs else xs
+
+
+parse :: String -> Maybe [Markdown]
+parse [] = Nothing
+parse input = fst <$> runParser (some markdownParser) input
+
+-- TODO: 
+-- span, *>
+-- alternative: many, some, empty
